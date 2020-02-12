@@ -1,7 +1,7 @@
 # example
 
 [![Build
-Status](https://travis-ci.org/miriam-goldman/HW3_skeleton.svg?branch=master)](https://travis-ci.org/miriam-goldman/HW3_skeleton)
+Status](https://travis-ci.org/jessicagainesbmi203/HW3_skeleton.svg?branch=master)](https://travis-ci.org/jessicagainesbmi203/HW3_skeleton)
 
 Example python project with testing.
 
