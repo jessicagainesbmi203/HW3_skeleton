@@ -11,5 +11,3 @@ def test_read_all_sequences():
     correct_seq = 'SLEAAQKSNVTSSWAKASAAWGTAGPEFFMALFDAHDDVFAKFSGLFSGAAKGTVKNTPEMAAQAQSFKGLVSNWVDNLDNAGALEGQCKTFAANHKARGISAGQLEAAFKVLSGFMKSYGGDEGAWTAVAGALMGEIEPDM'
     seqs = read_all_sequences('sequences')
     assert len(seqs) == 182
-    assert seqs[0].__repr__() == 'prot-0004'
-    assert seqs[0].sequence == correct_seq
