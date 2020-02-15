@@ -1,5 +1,5 @@
 from .utils import Seq
-from .io import read_sequence, read_all_sequences, read_scoring_matrix
+from .io import read_sequence, read_all_sequences, read_sub_matrix
 from .algs import smithwaterman
 import sys
 
@@ -9,7 +9,9 @@ if len(sys.argv) < 3:
     sys.exit(0)
     
 seqs = read_all_sequences(sys.argv[1])
-print(seqs)
+#print(seqs)
 
-scoring_matrix = read_scoring_matrix(sys.argv[2])
-print(scoring_matrix)
+sub_matrix = read_sub_matrix(sys.argv[2])
+#print(sub_matrix)
+
+smithwaterman(seqs[0],seqs[1], sys.argv[2])

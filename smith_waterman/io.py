@@ -34,7 +34,7 @@ def read_all_sequences(dir):
 
     return sequences
     
-def read_scoring_matrix(filepath):
+def read_sub_matrix(filepath):
     i = 0
     df = pd.DataFrame()
     index = []
