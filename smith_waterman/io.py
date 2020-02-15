@@ -1,6 +1,7 @@
 import os
 import glob
 from .utils import Seq
+import pandas as pd
 
 def read_sequence(filepath):
 
@@ -32,3 +33,20 @@ def read_all_sequences(dir):
     print("Read in %d sequences"%len(sequences))
 
     return sequences
+    
+def read_scoring_matrix(filepath):
+    i = 0
+    df = pd.DataFrame()
+    index = []
+    with open(filepath, "r") as f:
+        # iterate over each line in the file
+        for line in f:
+            if line[0:1] != "#":
+                if i == 0:
+                    df = pd.DataFrame(columns=line.split())
+                    index = line.split()
+                else:
+                    df.loc[i,:] = line.split()
+                i += 1
+        df.index = index
+    return df
