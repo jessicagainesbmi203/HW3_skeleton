@@ -315,35 +315,114 @@ def roc(sub_matrix_file,gap_open,gap_extend,true_filepath, false_filepath, false
 Part II
 '''
 
-def optimize(sub_matrix_file, true_filepath, false_filepath, fp_rates):
-    population = mutate(sub_matrix_file,100)
-    df = pd.DataFrame(columns=('score','matrix'))
+def optimize(sub_matrix_file, true_filepath, false_filepath, fp_rates, generations):
+    '''
+    By slowly altering a given substitution matrix over time, optimize the substitution 
+        matrix to maximize true positives for a given sequence alignment.
+    Inputs: sub_matrix_file: the starting point for optimization
+        true_filepath: filepath to document containing positive pairs of sequences
+        false_filepath: filepath to document containing negative pairs of sequences
+        fp_rates: list of proportions of false positives to test
+        generations: the number of generations to iterate
+    Output: A single optimal substitution matrix
+    '''
+    population = initialize_population(sub_matrix_file,100)
+    for g in range(generations):
+        top_10pct = evaluate(population, fp_rates)
+        population = cross(top_10pct,100)
+        population = mutate(population)
+    top_10pct = evaluate(population, fp_rates)
+    # return the best performing matrix
+    return top_10pct[0]
+
+def evaluate(population, fp_rates)
+    '''
+    Apply the objective function to each matrix and return the top 10% highest scoring matrices
+    Inputs: population: a list of matrices to evaluate
+        fp_rates: list of proportions of false positives to test
+    Outputs: top_10pct: the top 10% highest scoring matrices
+    '''
     i = 0
+    df = pd.DataFrame(columns=('score','matrix'))
     for matrix in population:
-        score = objective_function(fp_rates, sub_matrix_file)
-        store.loc[i,'score'] = score
-        store.loc[i,'matrix'] = matrix
+        score = objective_function(fp_rates, matrix)
+        df.loc[i,'score'] = score
+        df.loc[i,'matrix'] = matrix
         i += 1
     df = df.sort_values(by='score', ascending=False)
+    length = df.shape[0] * 0.1
+    top_10pct = df[df.index <= length]['matrix']
+    return top_10pct
+
+def mutate(matrix_list):
+    '''
+    Apply randomized mutations of -0.25 to +0.25 to each element of each substitution 
+        matrix in the population
+    Input: matrix_list: list of matrices to randomly adjust
+    Output: population: list of the adjusted versions of each matrix in matrix_list
+    '''
+    population = list()
+    for matrix in matrix_list:
+        new_matrix = matrix.copy()
+        for j in range(new_matrix.shape[0]):
+            for k in range(j+1):
+                new_element = new_matrix.iloc[j,k] + (0.5*np.random.random() - 0.25)
+                new_matrix.iloc[j,k] = new_element
+                # keep matrix symmetrical
+                new_matrix.iloc[k,j] = new_element
+        population.append(new_matrix)
+    return population
     
-def objective_function(fp_rates,sub_matrix_file):
+def cross(matrix_list,n):
+    '''
+    Repopulate with the elements of the best scoring matrices
+    Inputs: matrix_list: the parent matrices to draw info from
+        n: the number of children
+    Outputs: children: the population of matrices compiled from the original population of parents
+    '''
+    children = list()
+    for i in range(n):
+        # select parents
+        choice = np.random.randint(0,len(matrix_list),2)
+        parent1 = matrix_list[choice[0]]
+        parent2 = matrix_list[choice[1]]
+        new_matrix = parent1.copy()
+        # recombine
+        for j in range(new_matrix.shape[0]):
+            for k in range(j+1):
+                if np.random.random() > 0.5:
+                    new_matrix.loc[j,k] = parent2.loc[j,k]
+                    new_matrix.loc[k,j] = parent2.loc[j,k]
+        children.append(new_matrix)
+    return children           
+    
+def objective_function(fp_rates,sub_matrix):
+    '''
+    Evaluate a substitution matrix according to the given standard -- the sum of true positive rates 
+        for at false positive rates of 0,0.1,0.2, and 0.3.
+    Inputs: fp_rates: a list of the false positive rates to test
+        sub_matrix: the substitution matrix to evaluate
+    Outputs: sum: the sum of true positives from the testing, the standard of evaluation.
+    '''
     sum = 0
     for rate in fp_rates:
-        tp_rate = get_true_pos_rate(sub_matrix_file,10,2,'Pospairs.txt','Negpairs.txt',rate, normalize=False)
+        tp_rate = get_true_pos_rate(sub_matrix,10,2,'Pospairs.txt','Negpairs.txt',rate, normalize=False)
         sum += tp_rate
     return sum
         
-def mutate(sub_matrix_file,n):
+def initialize_population(sub_matrix_file,n):
+    '''
+    From a single starting matrix, create a population of substitution matrices to evolve
+    Inputs: sub_matrix_file: the filepath to the document containing the original substitution matrix
+        n: the number of matrices in the output population
+    Outputs: population: the initial population, created by mutating a single substitution matrix
+    '''
     sub_matrix = read_sub_matrix(sub_matrix_file)
     population = list()
     for i in n:
         new_matrix = sub_matrix.copy()
-        for j in range(new_matrix.shape[0]):
-            for k in range(j):
-                new_element = new_matrix.iloc[j,k] + (0.5*np.random.random() - 0.25)
-                new_matrix.iloc[j,k] = new_element
-                new_matrix.iloc[k,j] = new_element
         population.append(new_matrix)
+    population = mutate(population)
     return population
         
     
