@@ -335,7 +335,7 @@ def optimize(sub_matrix_file, true_filepath, false_filepath, fp_rates, generatio
     # return the best performing matrix
     return top_10pct[0]
 
-def evaluate(population, fp_rates)
+def evaluate(population, fp_rates):
     '''
     Apply the objective function to each matrix and return the top 10% highest scoring matrices
     Inputs: population: a list of matrices to evaluate
