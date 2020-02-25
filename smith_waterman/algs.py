@@ -340,7 +340,7 @@ def mutate(sub_matrix_file,n):
         new_matrix = sub_matrix.copy()
         for j in range(new_matrix.shape[0]):
             for k in range(j):
-                new_element = new_matrix.iloc[j,k] + (np.random.random() - 0.5)
+                new_element = new_matrix.iloc[j,k] + (0.5*np.random.random() - 0.25)
                 new_matrix.iloc[j,k] = new_element
                 new_matrix.iloc[k,j] = new_element
         population.append(new_matrix)
